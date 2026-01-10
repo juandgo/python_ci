@@ -28,14 +28,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: uvx run pyright .
+      # - run: uvx run pyright .
+      - run: uvx pyright .
   tests:
     runs-on: ubuntu-latest
     needs: [lock_file]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: uv run pytest -v --durations=0 --cov --cov-report=xml
+      - run: uv run python -m pytest -v --durations=0 --cov --cov-report=xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
