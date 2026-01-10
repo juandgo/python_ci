@@ -32,7 +32,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: uv sync        # Sincronización correcta
       - run: uv run pyright .           # Ejecución sin flags conflictivos
 
   tests:
@@ -42,6 +41,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
       - run: uv sync
+      # Instalamos pytest explícitamente para asegurar que exista
+      - run: uv pip install pytest pytest-cov
       - run: uv run python -m pytest -v --durations=0 --cov --cov-report=xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
