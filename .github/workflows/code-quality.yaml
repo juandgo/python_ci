@@ -7,9 +7,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: uv lock  # Genera o actualiza el lockfile dinámicamente
+      - run: uv lock
 
-  # Estos tres jobs corren en paralelo tras el lock
   linting:
     runs-on: ubuntu-latest
     needs: [lock_file]
@@ -32,27 +31,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: uv sync --group dev        # Instala pyright y dependencias
-      - run: uv run pyright .
+      - run: uv sync --group dev        # Instalamos pyright y dependencias de desarrollo
+      - run: uv run pyright .           # Ejecutamos pyright correctamente
 
-  # Los tests solo corren si la calidad base (lint/format) es correcta
   tests:
     runs-on: ubuntu-latest
-    needs: [linting, formatting] 
+    needs: [linting, formatting, type_consistency] # Solo corre si lo anterior está bien
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: uv sync --group dev        # Asegura que pytest esté presente
+      - run: uv sync --group dev        # Aseguramos que pytest esté instalado
       - run: uv run python -m pytest -v --durations=0 --cov --cov-report=xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  # El build final
   build:
     runs-on: ubuntu-latest
-    needs: [type_consistency, tests]
+    needs: [tests]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
